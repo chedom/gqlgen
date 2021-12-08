@@ -112,7 +112,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			return errors.New("unknown type: "+typeName)
 		}
 	}
-	
+
 	resolveManyEntities := func(ctx context.Context, typeName string, reps []map[string]interface{}, idx []int) (err error) {
 		// we need to do our own panic handling, because we may be called in a
 		// goroutine, where the usual panic handling can't catch us
@@ -127,7 +127,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			{{ if .ResolverName -}}
 				{{ if .Multi -}}
 				case "{{.Def.Name}}":
-					_reps := make([]*{{.InputType}}, len(reps))
+					_reps := make([]*{{.InputTypeObj.Type | ref}}, len(reps))
 
 					for i, rep := range reps {
 						{{ range $i, $keyField := .KeyFields -}}
@@ -137,7 +137,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 							}
 						{{end}}
 
-						_reps[i] = &{{.InputType}} {
+						_reps[i] = &{{.InputTypeObj.Type | ref}} {
 						{{ range $i, $keyField := .KeyFields -}}
 							{{$keyField.Field.ToGo}}: id{{$i}},
 						{{end}}
@@ -193,7 +193,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			e.Wait()
 		}
 	}
- 
+
 	buildRepresentationGroups(representations)
 
 	switch len(repsMap) {

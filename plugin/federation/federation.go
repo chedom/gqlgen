@@ -161,6 +161,7 @@ type Entity struct {
 	KeyFields    []*KeyField // The fields declared in @key.
 	ResolverName string      // The resolver name, such as FindUserByID
 	InputType    string      // The Go generated input type for multi entity resolvers
+	InputTypeObj *codegen.Object
 	Def          *ast.Definition
 	Requires     []*Requires
 	Multi        bool
@@ -216,6 +217,15 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 				}
 				cgField := reqField.Field.TypeReference(obj, data.Objects)
 				reqField.Type = cgField.TypeReference
+			}
+
+			if e.InputType != "" {
+				input := data.Inputs.ByName(e.InputType)
+				if input == nil {
+					continue
+				}
+
+				e.InputTypeObj = input
 			}
 		}
 	}
