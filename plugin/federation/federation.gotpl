@@ -25,6 +25,8 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 	}, nil
 }
 
+{{- $root := . -}}
+
 {{if .Entities}}
 func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
 	list := make([]fedruntime.Entity, len(representations))
@@ -127,7 +129,11 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			{{ if .ResolverName -}}
 				{{ if .Multi -}}
 				case "{{.Def.Name}}":
+					{{ if $root.OmitSliceElementPointers -}}
+					_reps := make([]{{.InputTypeObj.Type | ref}}, len(reps))
+					{{ else }}
 					_reps := make([]*{{.InputTypeObj.Type | ref}}, len(reps))
+					{{ end }}
 
 					for i, rep := range reps {
 						{{ range $i, $keyField := .KeyFields -}}
@@ -137,7 +143,11 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 							}
 						{{end}}
 
+						{{ if $root.OmitSliceElementPointers -}}
+						_reps[i] = {{.InputTypeObj.Type | ref}} {
+						{{ else }}
 						_reps[i] = &{{.InputTypeObj.Type | ref}} {
+						{{ end }}
 						{{ range $i, $keyField := .KeyFields -}}
 							{{$keyField.Field.ToGo}}: id{{$i}},
 						{{end}}
